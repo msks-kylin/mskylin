@@ -1,37 +1,73 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Static Webpage</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-      padding: 20px;
-      background-color: #f9f9f9;
-    }
-    pre {
-      background-color: #272822;
-      color: #f8f8f2;
-      padding: 15px;
-      border-radius: 5px;
-      overflow-x: auto;
-      font-family: "Courier New", Courier, monospace;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人笔记</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #4CAF50;
+        }
+        .note-container {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        textarea {
+            width: 100%;
+            height: 100px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 10px;
+            resize: none;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
 </head>
 <body>
-  <h1>Static Webpage Example</h1>
-  <p>This page displays the following code snippet:</p>
-  <pre>
-    <code>
-      // Example JavaScript Code
-      function greet(name) {
-        return `Hello, ${name}!`;
-      }
-      console.log(greet("GitHub Pages"));
-    </code>
-  </pre>
+    <h1>个人笔记</h1>
+    <div class="note-container">
+        <textarea id="noteInput" placeholder="在这里写下你的笔记..."></textarea>
+        <button onclick="saveNote()">保存笔记</button>
+        <button onclick="deleteNote()">删除笔记</button>
+    </div>
+    <script>
+        function saveNote() {
+            const note = document.getElementById('noteInput').value;
+            localStorage.setItem('personalNote', note);
+            alert('笔记已保存！');
+        }
+        function deleteNote() {
+            localStorage.removeItem('personalNote');
+            document.getElementById('noteInput').value = '';
+            alert('笔记已删除！');
+        }
+        // 加载已保存的笔记
+        window.onload = function() {
+            const savedNote = localStorage.getItem('personalNote');
+            if (savedNote) {
+                document.getElementById('noteInput').value = savedNote;
+            }
+        };
+    </script>
 </body>
 </html>
