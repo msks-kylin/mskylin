@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>个人笔记</title>
+    <title>个人笔记本</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -41,31 +41,46 @@
         button:hover {
             background-color: #45a049;
         }
+        #preview {
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 4px;
+            background: #fff;
+            margin-top: 20px;
+        }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/2.1.3/marked.min.js"></script>
 </head>
 <body>
-    <h1>个人笔记</h1>
+    <h1>个人笔记本</h1>
     <div class="note-container">
-        <textarea id="noteInput" placeholder="在这里写下你的笔记..."></textarea>
+        <textarea id="noteInput" placeholder="在这里写下你的笔记... (支持Markdown)"></textarea>
         <button onclick="saveNote()">保存笔记</button>
         <button onclick="deleteNote()">删除笔记</button>
     </div>
+    <div id="preview"></div>
     <script>
         function saveNote() {
             const note = document.getElementById('noteInput').value;
             localStorage.setItem('personalNote', note);
+            renderMarkdown(note);
             alert('笔记已保存！');
         }
         function deleteNote() {
             localStorage.removeItem('personalNote');
             document.getElementById('noteInput').value = '';
+            document.getElementById('preview').innerHTML = '';
             alert('笔记已删除！');
+        }
+        function renderMarkdown(note) {
+            document.getElementById('preview').innerHTML = marked(note);
         }
         // 加载已保存的笔记
         window.onload = function() {
             const savedNote = localStorage.getItem('personalNote');
             if (savedNote) {
                 document.getElementById('noteInput').value = savedNote;
+                renderMarkdown(savedNote);
             }
         };
     </script>
