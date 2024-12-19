@@ -97,10 +97,120 @@ file_path&nbsp;=&nbsp;r&quot;C:\Users\123\Desktop\ZSM-5绘图数据表.xlsx&quot
     </div>
 
     <div class="note">
+        <h2>一级动力学拟合</h2> <!-- 笔记标题 -->
+        <p>def&nbsp;plot_jj_k(sheet_name,&nbsp;save_path):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;data&nbsp;=&nbsp;pd.read_excel(file_name,&nbsp;sheet_name=sheet_name,&nbsp;engine=&quot;calamine&quot;,&nbsp;header=0)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;time&nbsp;=&nbsp;data.iloc[1:,&nbsp;0].values<br>
+&nbsp;&nbsp;&nbsp;&nbsp;concentrations&nbsp;=&nbsp;data.iloc[1:,&nbsp;1::2].values<br>
+&nbsp;&nbsp;&nbsp;&nbsp;c0&nbsp;=&nbsp;data.iloc[1,&nbsp;1::2].values</p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;fig,&nbsp;ax&nbsp;=&nbsp;plt.subplots(figsize=(8,&nbsp;6))<br>
+&nbsp;&nbsp;&nbsp;&nbsp;plt.rcParams[&quot;axes.linewidth&quot;]&nbsp;=&nbsp;2</p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;ln_c_c0&nbsp;=&nbsp;-np.log(concentrations&nbsp;/&nbsp;c0)<br>
+&nbsp;&nbsp;&nbsp;</p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;创建一个新的DataFrame来存储-ln(c/c0)的结果，便于后续处理<br>
+&nbsp;&nbsp;&nbsp;&nbsp;ln_c_c0_df&nbsp;=&nbsp;pd.DataFrame(ln_c_c0,&nbsp;columns=data.columns[1::2])<br>
+&nbsp;&nbsp;&nbsp;</p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;绘制-ln(c/c0)&nbsp;对&nbsp;time&nbsp;的图形</p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;for&nbsp;i&nbsp;in&nbsp;range(0,&nbsp;ln_c_c0_df.shape[1]):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;slope,&nbsp;intercept,&nbsp;r_value,&nbsp;_,&nbsp;_&nbsp;=&nbsp;linregress(time,&nbsp;ln_c_c0_df.iloc[:,&nbsp;i])<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;color&nbsp;=&nbsp;colors[i&nbsp;%&nbsp;len(colors)]</p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;plt.plot(time,ln_c_c0_df.iloc[:,&nbsp;i],&nbsp;&quot;o&quot;,&nbsp;color=color)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;plt.plot(<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;time,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;slope&nbsp;*&nbsp;time&nbsp;+&nbsp;intercept,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;linestyle=&quot;-&quot;,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;color=color,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;label=f&quot;K={slope:.4f},&nbsp;R$^2$={r_value&nbsp;**&nbsp;2:.4f}&quot;,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)</p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;ax.tick_params(axis=&quot;x&quot;,&nbsp;direction=&quot;in&quot;)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;ax.tick_params(axis=&quot;y&quot;,&nbsp;direction=&quot;in&quot;)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;数据标签大小<br>
+&nbsp;&nbsp;&nbsp;&nbsp;ax.tick_params(labelsize=16)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;ax.set_xlabel(&quot;Time(min$^{-1}$)&quot;,&nbsp;fontsize=16,&nbsp;fontweight=&quot;bold&quot;)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;ax.set_ylabel(&quot;-ln(C/C$_{0}$)&quot;,&nbsp;fontsize=16,&nbsp;fontweight=&quot;bold&quot;)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;ax.legend(bbox_to_anchor=(0.01,&nbsp;0.99),&nbsp;loc=&quot;upper&nbsp;left&quot;,&nbsp;fontsize=10)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;#左上角图序号<br>
+&nbsp;&nbsp;&nbsp;&nbsp;ax.text(<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-0.055,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;(b)&quot;,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fontsize=16,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fontweight=&quot;bold&quot;,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;transform=plt.gca().transAxes,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ha=&quot;right&quot;,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;va=&quot;top&quot;,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;plt.subplots_adjust(left=0.1,&nbsp;right=0.95,&nbsp;bottom=0.1,&nbsp;top=0.95)</p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;save_path:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;plt.savefig(save_path,&nbsp;dpi=1200)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;else:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;print(&quot;您没有设置保存路径&quot;)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;plt.show()<br>
+</p> <!-- 笔记内容 -->
+    </div>
+
+    <div class="note">
+        <h2>BGMGK拟合函数</h2> <!-- 笔记标题 -->
+        <p>def&nbsp;plot_jj_k(data,&nbsp;save_path_k=None):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;plt.close(&#39;all&#39;)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;time&nbsp;=&nbsp;data.iloc[1:,&nbsp;0].values<br>
+&nbsp;&nbsp;&nbsp;&nbsp;c&nbsp;=&nbsp;data.iloc[1:,&nbsp;1::2].values</p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;Reshape&nbsp;time&nbsp;to&nbsp;match&nbsp;the&nbsp;shape&nbsp;of&nbsp;c&nbsp;for&nbsp;broadcasting<br>
+&nbsp;&nbsp;&nbsp;&nbsp;time_reshaped&nbsp;=&nbsp;time.reshape(-1,&nbsp;1)</p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;Calculate&nbsp;y_series&nbsp;using&nbsp;broadcasting、<br>
+&nbsp;&nbsp;&nbsp;&nbsp;epsilon&nbsp;=&nbsp;np.finfo(np.float64).eps&nbsp;&nbsp;#&nbsp;获取浮点数的机器精度<br>
+&nbsp;&nbsp;&nbsp;&nbsp;denominator&nbsp;=&nbsp;1&nbsp;-&nbsp;c&nbsp;+&nbsp;epsilon<br>
+&nbsp;&nbsp;&nbsp;&nbsp;y_series&nbsp;=&nbsp;time_reshaped&nbsp;/denominator<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;Convert&nbsp;y_series&nbsp;into&nbsp;DataFrame&nbsp;for&nbsp;easier&nbsp;manipulation<br>
+&nbsp;&nbsp;&nbsp;&nbsp;y_series_df&nbsp;=&nbsp;pd.DataFrame(y_series,&nbsp;columns=data.columns[1::2])</p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;Plotting&nbsp;and&nbsp;regression&nbsp;analysis<br>
+&nbsp;&nbsp;&nbsp;&nbsp;fig,&nbsp;ax&nbsp;=&nbsp;plt.subplots(figsize=(8,&nbsp;6))<br>
+&nbsp;&nbsp;&nbsp;&nbsp;for&nbsp;i&nbsp;in&nbsp;range(y_series_df.shape[1]):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;slope,&nbsp;intercept,&nbsp;r_value,&nbsp;_,&nbsp;_&nbsp;=&nbsp;linregress(time,&nbsp;y_series_df.iloc[:,&nbsp;i])<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;color&nbsp;=&nbsp;colors[i&nbsp;%&nbsp;len(colors)]</p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;plt.plot(time,&nbsp;y_series_df.iloc[:,&nbsp;i],&nbsp;&quot;o&quot;,&nbsp;color=color)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ax.plot(<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;time,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;slope&nbsp;*&nbsp;time&nbsp;+&nbsp;intercept,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;linestyle=&quot;-&quot;,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;color=color,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;label=f&quot;1/m={1/intercept:.4f},&nbsp;R$^2$={r_value&nbsp;**&nbsp;2:.4f}&quot;,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)</p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;ax.tick_params(axis=&quot;both&quot;,&nbsp;direction=&quot;in&quot;)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;ax.set_xlabel(&quot;Time&nbsp;(min)&quot;,&nbsp;fontsize=16,&nbsp;fontweight=&quot;bold&quot;)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;ax.set_ylabel(&quot;t/(1-C$_t$/C$_0$)&quot;,&nbsp;fontsize=16,&nbsp;fontweight=&quot;bold&quot;)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;ax.legend(bbox_to_anchor=(0.01,&nbsp;0.99),&nbsp;loc=&quot;upper&nbsp;left&quot;,&nbsp;fontsize=16)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;plt.subplots_adjust(left=0.1,&nbsp;right=0.95,&nbsp;bottom=0.1,&nbsp;top=0.95)</p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;save_path_k:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;plt.savefig(save_path_k,&nbsp;dpi=1200)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;else:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;print(&quot;您没有设置保存路径&quot;)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;plt.show()<br>
+</p> <!-- 笔记内容 -->
+    </div>
+
+    <div class="note">
         <h2>笔记标题 3</h2> <!-- 笔记标题 -->
         <p>这是笔记内容 3。在这里添加你的笔记详细信息。</p> <!-- 笔记内容 -->
     </div>
 
+    
     <!-- 可以继续添加更多笔记 -->
 </body>
 
